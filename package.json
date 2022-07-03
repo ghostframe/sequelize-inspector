@@ -1,0 +1,36 @@
+{
+  "name": "sequelize-inspector",
+  "version": "0.1.0",
+  "description": "Sequelize pool usage inspector",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghostframe/sequelize-inspector.git"
+  },
+  "keywords": [
+    "inspection",
+    "pool",
+    "connection",
+    "debug",
+    "deadlock",
+    "acquire",
+    "timeout"
+  ],
+  "author": "ghostframe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ghostframe/sequelize-inspector/issues"
+  },
+  "homepage": "https://github.com/ghostframe/sequelize-inspector#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "sequelize": "^5.22.5"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}
