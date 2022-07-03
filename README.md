@@ -1,7 +1,12 @@
 ## sequelize-inspector
 
-Inspect sequelize's connection pool usage and query performance:
+Inspect sequelize's connection pool usage and query performance. This library inspects `sequelize` and shows the info on your `express` server.
 
+### 1. Install
+```js
+npm install sequelize-inspector
+```
+### 2. Use
 ```ts
 import SequelizeInspector from 'sequelize-inspector'
 
@@ -10,9 +15,10 @@ import SequelizeInspector from 'sequelize-inspector'
 SequelizeInspector.init(express, sequelize)
 ```
 
-Now open up `/sequelize` and you'll see this graph. 
+### 3. Open
+Start up your server, open up `/sequelize` and you'll see this graph. 
 
-Each "lane" represents a connection to the database, and rectangles are queries and transactions. Hover them to see more info.
+Each "lane" represents a connection to the database. Rectangles within it are queries and transactions. Hover them to see their details.
 
 ![screenshot](/screenshot.png)
 
