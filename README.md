@@ -12,7 +12,7 @@ import SequelizeInspector from 'sequelize-inspector'
 
 // ... setup sequelize and express
 
-SequelizeInspector.init(express, sequelize)
+SequelizeInspector.init(app, sequelize)
 ```
 
 ### 3. Open
