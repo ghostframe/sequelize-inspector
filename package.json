@@ -1,6 +1,6 @@
 {
   "name": "sequelize-inspector",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sequelize pool usage inspector",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

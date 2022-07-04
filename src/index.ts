@@ -84,7 +84,7 @@ const sequelizeInspectorPage = `<!DOCTYPE html>
       </div>
     </div>
     <div v-else>
-      <p>No data yet.</p>
+      <p class="mt-5 pt-4">No sequelize calls detected yet. Go run some queries!</p>
     </div>
   </div>
   <script src="https://unpkg.com/vue@3"></script>
@@ -188,11 +188,11 @@ class Query {
     public startTime: number = now(),
     public sql?: string,
     public endTime?: number,
-  ) {}
+  ) { }
 }
 
 class Transaction {
-  constructor(public id: string, public startTime: number = now(), public endTime?: number) {}
+  constructor(public id: string, public startTime: number = now(), public endTime?: number) { }
 }
 
 class Connection {
@@ -202,17 +202,28 @@ class Connection {
     public transactions: Transaction[] = [],
     public startTime: number = now(),
     public endTime?: number
-  ) {}
+  ) { }
 }
 
 class Recording {
   constructor(
     public connections: Connection[] = [],
     public startTime?: number
-  ) {}
+  ) { }
 }
 
 const recording = new Recording();
+
+const MAX_CONNECTION_RECORDS = 10000;
+
+function createConnection(id: string): Connection {
+  const connection = new Connection(id);
+  if (recording.connections.length >= MAX_CONNECTION_RECORDS) { // So connections don't grow indefinitely
+    recording.connections.shift()
+  }
+  recording.connections.push(connection);
+  return connection;
+}
 
 function findOrCreateConnection(id: string): Connection {
   const existingConnection = recording.connections.find(
@@ -221,9 +232,7 @@ function findOrCreateConnection(id: string): Connection {
   if (existingConnection) {
     return existingConnection;
   } else {
-    const connection = new Connection(id);
-    recording.connections.push(connection);
-    return connection;
+    return createConnection(id)
   }
 }
 
@@ -296,29 +305,41 @@ function getConnectionId(connection: any): any {
 }
 
 function handleAfterConnect(connection: any): void {
-  connection._sequelizeInspectorUuid = uuid() // Sequelize sometimes changes connection uuids (e.g. when a transaction starts). So we mark them with our own uuids
-  const connectionId = getConnectionId(connection);
-  Recorder.connectionAcquired(connectionId);
+  try {
+    connection._sequelizeInspectorUuid = uuid() // Sequelize sometimes changes connection uuids (e.g. when a transaction starts). So we mark them with our own uuids
+    const connectionId = getConnectionId(connection);
+    Recorder.connectionAcquired(connectionId);
+  } catch (error) { // Never pop error to the library client
+  }
 }
 
 function handleAfterDisconnect(connection: any): void {
-  Recorder.connectionReleased(getConnectionId(connection));
+  try {
+    Recorder.connectionReleased(getConnectionId(connection));
+  } catch (error) {
+  }
 }
 
 function handleBeforeQuery(options: any, query: any) {
-  if (options.type !== 'DEFERRED') {
-    Recorder.queryStarted(getConnectionId(query.connection), query.uuid);
+  try {
+    if (options.type !== 'DEFERRED') {
+      Recorder.queryStarted(getConnectionId(query.connection), query.uuid);
+    }
+  } catch (error) {
   }
 }
 
 function handleAfterQuery(_: any, query: any) {
-  const connectionId = getConnectionId(query.connection);
-  if (query.sql === 'START TRANSACTION;') {
-    Recorder.transactionStarted(connectionId, query.uuid)
-  } else if (query.sql === 'COMMIT;' || query.sql === 'ROLLBACK;') {
-    Recorder.transactionEnded(connectionId, query.uuid)
-  } else {
-    Recorder.queryEnded(connectionId, query.sql, query.uuid);
+  try {
+    const connectionId = getConnectionId(query.connection);
+    if (query.sql === 'START TRANSACTION;') {
+      Recorder.transactionStarted(connectionId, query.uuid)
+    } else if (query.sql === 'COMMIT;' || query.sql === 'ROLLBACK;') {
+      Recorder.transactionEnded(connectionId, query.uuid)
+    } else {
+      Recorder.queryEnded(connectionId, query.sql, query.uuid);
+    }
+  } catch (error) {
   }
 }
 
